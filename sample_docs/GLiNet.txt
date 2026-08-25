@@ -1,0 +1,65 @@
+# Basic system information
+uname -a
+uname -m
+hostnamectl
+
+# OpenWrt / GL.iNet firmware information
+cat /etc/openwrt_release
+cat /etc/os-release
+ubus call system board
+
+# CPU / Architecture
+cat /proc/cpuinfo
+lscpu
+
+# Memory
+free -h
+cat /proc/meminfo
+
+# Storage
+df -h
+lsblk
+
+# Flash (if available)
+cat /proc/mtd
+
+# Kernel
+uname -r
+
+# Package architecture
+opkg print-architecture
+
+# Installed packages
+opkg list-installed
+
+# OpenVPN
+openvpn --version
+which openvpn
+ldd $(which openvpn)
+
+# OpenSSL
+openssl version -a
+which openssl
+ldd $(which openssl)
+
+# C library (musl/glibc)
+ldd --version
+strings /lib/libc.so* | head -20
+
+# Loaded kernel modules
+lsmod
+
+# Installed kernel modules
+opkg list-installed | grep kmod
+
+# System logs
+logread
+dmesg
+
+# GL.iNet specific (if available)
+glinet --version
+fw_printenv
+
+# Hardware detection
+cat /sys/firmware/devicetree/base/model
+cat /sys/firmware/devicetree/base/compatible

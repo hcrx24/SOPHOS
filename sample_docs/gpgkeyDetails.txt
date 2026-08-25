@@ -1,0 +1,6 @@
+pub   ed25519 2024-08-08 [SC] [expires: 2024-08-13]
+      42F21D6425205B0A70CA9C0F0CC3173F26F06B6C
+uid                      wesee (GPG KEY for WESEE) <weseecsc24@gmail.com>
+sub   cv25519 2024-08-08 [E] [expires: 2024-08-13]
+gpg: directory '/home/sohan/.gnupg/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/home/sohan/.gnupg/openpgp-revocs.d/42F21D6425205B0A70CA9C0F0CC3173F26F06B6C.rev'

@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package sophos;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SOPHOS SSE gRPC Service
+//  Forward-Private Symmetric Searchable Encryption (Bost, CCS 2016)
+// ─────────────────────────────────────────────────────────────────────────────
+
+service SophosServer {
+  // Store an encrypted document blob on the server
+  rpc UploadDocument (UploadDocRequest)   returns (Ack);
+
+  // Store a batch of encrypted index entries (UT → EncID)
+  rpc UploadIndex    (UploadIndexRequest) returns (Ack);
+
+  // Search: server walks the RSA trapdoor chain and streams back encrypted doc IDs
+  rpc Search         (SearchRequest)      returns (stream SearchResult);
+
+  // Retrieve an encrypted document by its doc_id
+  rpc FetchDocument  (FetchDocRequest)    returns (EncryptedDoc);
+
+  // Dump index entries for the Server State panel (demo/debug)
+  rpc DumpIndex      (DumpRequest)        returns (stream IndexEntry);
+
+  // Reset / clear all index entries and document store
+  rpc ResetDatabase  (ResetRequest)       returns (Ack);
+
+  // Health check + stats
+  rpc Ping           (PingRequest)        returns (Ack);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Upload
+// ─────────────────────────────────────────────────────────────────────────────
+
+message UploadDocRequest {
+  bytes  doc_id     = 1;   // 16 bytes  — SHA-256(filename+nonce)[:16]
+  bytes  iv         = 2;   // 12 bytes  — AES-GCM nonce
+  bytes  ciphertext = 3;   // variable  — AES-256-GCM encrypted content
+  bytes  tag        = 4;   // 16 bytes  — AES-GCM authentication tag
+  string filename   = 5;   // original filename (stored encrypted via doc key)
+}
+
+message IndexEntry {
+  bytes ut     = 1;   // 32 bytes — SHA-256(Kw ‖ ST)
+  bytes enc_id = 2;   // 16 bytes — doc_id XOR SHA-256(Kw ‖ ST ‖ "id")[:16]
+}
+
+message UploadIndexRequest {
+  repeated IndexEntry entries = 1;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Search
+// ─────────────────────────────────────────────────────────────────────────────
+
+message SearchRequest {
+  bytes  kw_bytes = 1;   // 32 bytes  — HMAC-SHA256(master_key, keyword)
+  bytes  st_bytes = 2;   // 256 bytes — latest ST (RSA-2048 integer, big-endian)
+  int32  counter  = 3;   // number of uploads for this keyword (0-indexed)
+  bytes  rsa_e    = 4;   // RSA public exponent bytes (big-endian)
+  bytes  rsa_n    = 5;   // RSA modulus bytes (big-endian, 256 bytes)
+}
+
+message SearchResult {
+  bytes enc_id = 1;   // encrypted doc_id — client decrypts with Kw + ST at step
+  int32 step   = 2;   // chain step index (counter → 0), for client ST recomputation
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Fetch
+// ─────────────────────────────────────────────────────────────────────────────
+
+message FetchDocRequest {
+  bytes doc_id = 1;
+}
+
+message EncryptedDoc {
+  bytes  iv         = 1;
+  bytes  ciphertext = 2;
+  bytes  tag        = 3;
+  string filename   = 4;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Misc
+// ─────────────────────────────────────────────────────────────────────────────
+
+message DumpRequest  {}
+message ResetRequest {}
+message PingRequest  {}
+
+message Ack {
+  bool   ok  = 1;
+  string msg = 2;
+}

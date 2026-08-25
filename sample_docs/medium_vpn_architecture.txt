@@ -1,0 +1,68 @@
+===================================================================
+SOPHOS SSE - Technical Specification & VPN Architecture
+===================================================================
+System Overview:
+Virtual Private Networks (VPN) and Secure Searchable Encryption (SSE)
+provide end-to-end data confidentiality for high-security enterprise environments.
+
+1. Protocol Description
+The Sophos SSE scheme (Bost CCS 2016) achieves forward privacy by constructing an
+inverted index using RSA trapdoor permutations. When a client adds a new document containing
+keywords w_1, w_2, ..., w_n, it updates its local state database ST[w] and computes a
+fresh update token UT = SHA256(Kw || ST) and encrypted document pointer enc_id.
+
+2. Transport Security (mTLS + gRPC)
+All client-server communications operate over gRPC using mutual Transport Layer Security (mTLS).
+- Server authenticates using server.crt / server.key.
+- Client authenticates using client.crt / client.key.
+- Root Certificate Authority (ca.crt) validates both endpoints.
+- Subject Alternative Names (SAN) ensure hostname verification for cross-machine deployment.
+
+3. Keyword Processing & Lemmatization Pipeline
+To prevent exact-match retrieval limitations, the client tokenization module processes text using:
+- NLTK WordNetLemmatizer with POS tagging.
+- Automated stopword removal (filtering common English terms like the, and, is).
+- Cryptographic Whitelist preservation (ensuring terms like AES256, RSA2048, SHA256 are indexed).
+
+4. Database Layout
+- Client-side: SQLite database storing ST counter state per keyword (ST_w, counter_w).
+- Server-side: High-performance LMDB key-value database with dual column families:
+    a) encrypted_index: UT -> enc_id
+    b) doc_store: doc_id -> (iv || tag || ciphertext)
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+
+Security Notes on Forward Privacy:
+Forward privacy guarantees that when a client uploads a document containing keyword w, the server cannot learn if w was previously searched. In Sophos, this is achieved because update tokens ST_i are evolved using the RSA private key d (ST_i = ST_{i-1}^d mod N), while search trapdoors allow the server to step backward using the public exponent e (ST_{i-1} = ST_i^e mod N).
+

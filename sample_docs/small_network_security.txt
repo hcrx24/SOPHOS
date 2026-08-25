@@ -1,0 +1,22 @@
+===================================================================
+SOPHOS SSE - Small Network Security Note
+===================================================================
+Date: 2026-07-21
+Category: Network Security & Encryption
+
+Abstract:
+This document summarizes core principles of Symmetric Searchable Encryption (SSE)
+and mutual TLS (mTLS) applied to client-server network architectures.
+
+Key Cryptographic Concepts:
+- Forward Privacy: The server cannot link search tokens to previous search queries.
+- RSA-2048 Trapdoor: Used in Sophos to generate deterministic update tokens.
+- HMAC-SHA256: Derives pseudo-random keyword keys (Kw) from master secret key K.
+- AES-256-GCM: Authenticated encryption algorithm used for document storage.
+- gRPC & mTLS: Cross-machine encrypted channel using self-signed CA certificates.
+
+Keywords: network, vpn, rsa, encryption, security, sophos, mtls, grpc, privacy, HMAC, AES
+
+System Architecture Summary:
+Client holds master key K and SQLite database tracking keyword counters (ST).
+Server runs gRPC servicer backed by LMDB key-value store holding encrypted index UT -> EncID.
