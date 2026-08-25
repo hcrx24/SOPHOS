@@ -79,3 +79,88 @@ jobs:
       - name: Run Pytest Suite
         run: |
           xvfb-run --auto-servernum pytest tests/ -v
+
+  build:
+    name: Build Dist (Linux binaries)
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends --fix-missing \
+            libgl1 \
+            libegl1 \
+            libx11-xcb1 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxkbcommon-x11-0 \
+            xvfb
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r sophos_client/requirements.txt
+          pip install -r sophos_server/requirements.txt
+          pip install pyinstaller
+
+      - name: Compile Protobuf Stubs
+        run: |
+          python -m grpc_tools.protoc \
+            -Iproto \
+            --python_out=proto \
+            --grpc_python_out=proto \
+            proto/sophos.proto
+
+          cp proto/sophos_pb2.py sophos_server/
+          cp proto/sophos_pb2_grpc.py sophos_server/
+          cp proto/sophos_pb2.py sophos_client/
+          cp proto/sophos_pb2_grpc.py sophos_client/
+
+      - name: Build Server Binary
+        run: |
+          pyinstaller \
+            --onefile \
+            --name sophos-server \
+            --distpath dist/ \
+            sophos_server/server.py
+
+      - name: Build Client Binary
+        run: |
+          xvfb-run --auto-servernum \
+          pyinstaller \
+            --onefile \
+            --name sophos-client \
+            --distpath dist/ \
+            --windowed \
+            sophos_client/main.py
+
+      - name: Upload Server Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sophos-server-linux
+          path: dist/sophos-server
+          retention-days: 7
+
+      - name: Upload Client Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sophos-client-linux
+          path: dist/sophos-client
+          retention-days: 7
