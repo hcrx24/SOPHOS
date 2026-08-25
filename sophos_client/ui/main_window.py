@@ -32,23 +32,27 @@ HERE = Path(__file__).parent.parent.resolve()   # sophos_client/
 load_dotenv(dotenv_path=HERE / ".env", override=False)
 
 # ── Defaults from .env ────────────────────────────────────────────────────────
-_DEFAULT_HOST         = os.environ.get("SOPHOS_SERVER_HOST", "sophosserver")
-_DEFAULT_PORT         = os.environ.get("SOPHOS_SERVER_PORT", "50051")
-_DEFAULT_CERT_DIR     = os.environ.get("SOPHOS_CERTS",       str(HERE / ".." / "certs"))
-_DEFAULT_KEYS_DIR     = os.environ.get("SOPHOS_KEYS_DIR",    str(HERE / "keys"))
-_DEFAULT_STATE_DB     = os.environ.get("SOPHOS_STATE_DB",    str(HERE / "client.db"))
-_DEFAULT_SAMPLE_DIR   = os.environ.get("SOPHOS_SAMPLE_DIR",   str(HERE / ".." / "sample_docs"))
-_DEFAULT_DOWNLOAD_DIR = os.environ.get("SOPHOS_DOWNLOAD_DIR", str(HERE / ".." / "downloads"))
+_DEFAULT_HOST = os.environ.get("SOPHOS_SERVER_HOST", "sophosserver")
+_DEFAULT_PORT = os.environ.get("SOPHOS_SERVER_PORT", "50051")
 
-# Resolve relative paths against sophos_client/
-def _resolve(p: str) -> str:
-    return str(HERE / p) if not Path(p).is_absolute() else p
+CWD = Path(os.getcwd())
 
-_DEFAULT_CERT_DIR     = _resolve(_DEFAULT_CERT_DIR)
-_DEFAULT_KEYS_DIR     = _resolve(_DEFAULT_KEYS_DIR)
-_DEFAULT_STATE_DB     = _resolve(_DEFAULT_STATE_DB)
-_DEFAULT_SAMPLE_DIR   = _resolve(_DEFAULT_SAMPLE_DIR)
-_DEFAULT_DOWNLOAD_DIR = _resolve(_DEFAULT_DOWNLOAD_DIR)
+def _resolve_env(env_key: str, default_relative_to_here: Path) -> str:
+    """Return the path for a config value.
+    - If the env var is set: resolve relative to CWD (where the binary was launched).
+    - Otherwise:            use the default path relative to HERE (source/bundle dir).
+    """
+    val = os.environ.get(env_key)
+    if val:
+        p = Path(val)
+        return str(p if p.is_absolute() else CWD / p)
+    return str(default_relative_to_here)
+
+_DEFAULT_CERT_DIR     = _resolve_env("SOPHOS_CERTS",        HERE / ".." / "certs")
+_DEFAULT_KEYS_DIR     = _resolve_env("SOPHOS_KEYS_DIR",     HERE / "keys")
+_DEFAULT_STATE_DB     = _resolve_env("SOPHOS_STATE_DB",     HERE / "client.db")
+_DEFAULT_SAMPLE_DIR   = _resolve_env("SOPHOS_SAMPLE_DIR",   HERE / ".." / "sample_docs")
+_DEFAULT_DOWNLOAD_DIR = _resolve_env("SOPHOS_DOWNLOAD_DIR", HERE / ".." / "downloads")
 # ─────────────────────────────────────────────────────────────────────────────
 
 
