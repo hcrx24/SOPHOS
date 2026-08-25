@@ -39,16 +39,25 @@ from db import SophosDB
 # ── Config (all read after .env is loaded) ────────────────────────────────────
 LOG_LEVEL    = os.environ.get("LOG_LEVEL",          "INFO").upper()
 PORT         = int(os.environ.get("SOPHOS_PORT",    "50051"))
-DB_PATH      = os.environ.get("SOPHOS_DB",          str(HERE / "server.db"))
-CERT_DIR     = os.environ.get("SOPHOS_CERTS",       str(HERE / ".." / "certs"))
 MAP_SIZE_GB  = int(os.environ.get("SOPHOS_MAP_SIZE_GB", "1"))
 MAX_MSG_MB   = int(os.environ.get("SOPHOS_MAX_MSG_MB",  "64"))
 
-# Resolve relative paths against the server directory
-if not Path(DB_PATH).is_absolute():
-    DB_PATH = str(HERE / DB_PATH)
-if not Path(CERT_DIR).is_absolute():
-    CERT_DIR = str(HERE / CERT_DIR)
+CWD = Path(os.getcwd())
+
+# Paths from env vars are relative to CWD (where the user launched the binary).
+# Default fallback paths are relative to HERE (the source/bundle directory).
+_db_env    = os.environ.get("SOPHOS_DB")
+_certs_env = os.environ.get("SOPHOS_CERTS")
+
+if _db_env:
+    DB_PATH  = str(Path(_db_env) if Path(_db_env).is_absolute() else CWD / _db_env)
+else:
+    DB_PATH  = str(HERE / "server.db")
+
+if _certs_env:
+    CERT_DIR = str(Path(_certs_env) if Path(_certs_env).is_absolute() else CWD / _certs_env)
+else:
+    CERT_DIR = str((HERE / ".." / "certs").resolve())
 
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
