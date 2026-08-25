@@ -139,6 +139,7 @@ jobs:
             --onefile \
             --name sophos-server \
             --distpath dist/ \
+            --paths sophos_server \
             sophos_server/server.py
 
       - name: Build Client Binary
@@ -149,6 +150,7 @@ jobs:
             --name sophos-client \
             --distpath dist/ \
             --windowed \
+            --paths sophos_client \
             sophos_client/main.py
 
       - name: Upload Server Artifact
