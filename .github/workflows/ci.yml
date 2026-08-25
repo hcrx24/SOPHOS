@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -33,17 +33,19 @@ jobs:
       - name: Install System Dependencies (Headless Qt/PyQt6)
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get install -y --no-install-recommends --fix-missing \
             libgl1 \
             libegl1 \
             libx11-xcb1 \
             libxcb-cursor0 \
-            libxcb-xinerama0 \
             libxcb-icccm4 \
             libxcb-image0 \
             libxcb-keysyms1 \
             libxcb-render-util0 \
-            libxcb-shape0
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxkbcommon-x11-0 \
+            xvfb
 
       - name: Install Python Dependencies
         run: |
@@ -75,7 +77,5 @@ jobs:
           echo "Protobuf stubs generated and copied to sophos_server/ and sophos_client/."
 
       - name: Run Pytest Suite
-        env:
-          QT_QPA_PLATFORM: offscreen
         run: |
-          pytest tests/ -v
+          xvfb-run --auto-servernum pytest tests/ -v
